@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # my-apps
     "visits",
+    "commando",
 ]
 
 MIDDLEWARE = [
@@ -135,6 +136,24 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+
+STATICFILES_BASE_DIR = BASE_DIR / "staticfiles"
+STATICFILES_VENDOR_DIR = STATICFILES_BASE_DIR / "vendors"
+
+# this is the place where django will look for source of static files, including vendor css and js
+STATICFILES_DIRS = [
+    STATICFILES_BASE_DIR,
+]
+
+# output of python manage.py collectstatic, means django will collect static file from STATICFILES_DIR and store it in organised manner in below location
+
+STATIC_ROOT = BASE_DIR / "local-cdn"
+
+if not DEBUG:
+    STATIC_ROOT = BASE_DIR / "prod-cdn"
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
