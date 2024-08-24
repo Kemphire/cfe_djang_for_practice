@@ -23,19 +23,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = str(os.environ.get("DJANGO_DEBUG")).lower() == "true" 
-DEBUG = config("DJANGO_DEBUG",cast=bool)
+# DEBUG = str(os.environ.get("DJANGO_DEBUG")).lower() == "true"
+DEBUG = config("DJANGO_DEBUG", cast=bool)
 
 print("DEBUG", DEBUG, type(DEBUG))
 
-ALLOWED_HOSTS = [
-    ".railway.app" # https://saas.prod.railway.app
-]
+ALLOWED_HOSTS = [".railway.app"]  # https://saas.prod.railway.app
 if DEBUG:
-    ALLOWED_HOSTS += [
-        "127.0.0.1",
-        "localhost"
-    ]
+    ALLOWED_HOSTS += ["127.0.0.1", "localhost"]
 
 
 # Application definition
@@ -86,6 +81,7 @@ WSGI_APPLICATION = "cfehome.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -93,7 +89,17 @@ DATABASES = {
     }
 }
 
+CONN_MAX_AGE = config("CONN_MAX_AGE",cast=int)
+DATABASE_URL = config("DATABASE_URL", cast=str)
 
+if DATABASE_URL != None:
+    from dj_database_url import config as dj_config
+
+    DATABASES = {
+        "default":dj_config(
+        default=DATABASE_URL, conn_health_checks=True, conn_max_age=CONN_MAX_AGE
+    )
+    }
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
