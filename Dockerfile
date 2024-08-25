@@ -29,12 +29,24 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Create the mini vm's code directory
+
+ARG DJANGO_SECRET_KEY
+ARG DJANGO_DEBUG
+ARG CONN_MAX_AGE
+ARG DATABASE_URL
+ENV DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+ENV DJANGO_DEBUG=${DJANGO_DEBUG}
+ENV CONN_MAX_AGE=${CONN_MAX_AGE}
+ENV DATABASE_URL=${DATABASE_URL}
+
 RUN mkdir -p /code
 
 # Set the working directory to that same code directory
+
 WORKDIR /code
 
 # Copy the requirements file into the container
+
 COPY requirements.txt /tmp/requirements.txt
 
 # copy the project code into the container's working directory
@@ -46,6 +58,7 @@ RUN pip install -r /tmp/requirements.txt
 # database isn't available during build
 # run any other commands that do not need the database
 # such as:
+
 RUN python manage.py vendor_pull
 RUN python manage.py collectstatic --noinput
 
