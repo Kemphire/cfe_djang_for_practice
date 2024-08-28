@@ -2,9 +2,10 @@
 
 {%block content%}
 
-<form action="login/" method="post">
+<form action="{%url 'login'%}" method="post">
+	{% csrf_token %}
 	<input type="text" name="username" value="Username">
-	<input type="text" name="password" value="Password">
+	<input type="password" name="password" value="Password">
 
 	<button type="submit">
 		Login
