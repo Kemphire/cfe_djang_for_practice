@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "commando",
     "profiles",
     "subscriptions",
+    "customers",
     # Third party packages (apps)
     "allauth_ui",
     "allauth",
@@ -173,6 +174,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 SOCIALACCOUNT_PROVIDERS = {"github": {"VERIFIED_EMAIL": True}}
+
+ACCOUNT_FORMS = {"signup": "helpers.forms.CustomSignupFrom"}
 
 STATIC_URL = "static/"
 
