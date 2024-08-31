@@ -1,6 +1,6 @@
 <div>
     {% if request.user.is_authenticated %}
-		You are a user and your name {{request.user.username}}
+		You are a user and your name is {{request.user.username}}
     {% else %} 
     You are not a user 
     {% endif %}

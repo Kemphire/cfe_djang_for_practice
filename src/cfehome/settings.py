@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -18,19 +19,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # for gmail configuration
-EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST=config("EMAIL_HOST", default="smtp.gmail.com",cast=str)
-EMAIL_PORT=config("EMAIL_PORT", cast=str, default="587")
-EMAIL_USE_TLS=config("EMAIL_USE_TLS", cast=bool, default=True)
-EMAIL_USE_SSL=config("EMAIL_USE_SSL",cast=bool,default=False)
-EMAIL_HOST_USER=config("EMAIL_HOST_USER",cast=str, default=None)
-EMAIL_HOST_PASSWORD=config("EMAIL_HOST_PASSWORD", cast=str, default=None)
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com", cast=str)
+EMAIL_PORT = config("EMAIL_PORT", cast=str, default="587")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool, default=True)
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", cast=bool, default=False)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", cast=str, default=None)
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", cast=str, default=None)
 
 
-ADMINS=[
-    ('Kartikey', 'kartikey.23558@sscbs.du.ac.in')
-]
-MANAGERS=ADMINS
+ADMINS = [("Kartikey", "kartikey.23558@sscbs.du.ac.in")]
+MANAGERS = ADMINS
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -62,11 +61,16 @@ INSTALLED_APPS = [
     # my-apps
     "visits",
     "commando",
-
+    "profiles",
+    "subscriptions",
     # Third party packages (apps)
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
+    "allauth_ui",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.github",
+    "widget_tweaks",
+    "slippers",
 ]
 
 MIDDLEWARE = [
@@ -112,16 +116,16 @@ DATABASES = {
     }
 }
 
-CONN_MAX_AGE = config("CONN_MAX_AGE",cast=int)
+CONN_MAX_AGE = config("CONN_MAX_AGE", cast=int)
 DATABASE_URL = config("DATABASE_URL", cast=str)
 
-if DATABASE_URL != None:
+if DATABASE_URL is not None:
     from dj_database_url import config as dj_config
 
     DATABASES = {
-        "default":dj_config(
-        default=DATABASE_URL, conn_health_checks=True, conn_max_age=CONN_MAX_AGE
-    )
+        "default": dj_config(
+            default=DATABASE_URL, conn_health_checks=True, conn_max_age=CONN_MAX_AGE
+        )
     }
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -145,18 +149,20 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`
-    'django.contrib.auth.backends.ModelBackend',
-
+    "django.contrib.auth.backends.ModelBackend",
     # `allauth` specific authentication methods, such as login by email
-    'allauth.account.auth_backends.AuthenticationBackend',
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+LOGIN_REDIRECT_URL = "/"
+ALLAUTH_UI_THEME = "light"
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Kolkata"
 
 USE_I18N = True
 
@@ -166,7 +172,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-SOCIALACCOUNT_PROVIDERS = {}
+SOCIALACCOUNT_PROVIDERS = {"github": {"VERIFIED_EMAIL": True}}
 
 STATIC_URL = "static/"
 
@@ -185,7 +191,6 @@ STATIC_ROOT = BASE_DIR / "local-cdn"
 
 if not DEBUG:
     STATIC_ROOT = BASE_DIR / "prod-cdn"
-
 
 
 # Default primary key field type

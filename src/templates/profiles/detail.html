@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-lg font-medium">{{instance.username}}</h1>
+{% if owner %}
+<div>
+  {{isntance.first_name }} - {{instance.last_name}} 
+  {{instance.last_login}}
+</div>
+{% else %}
+{% if perms.auth %}
+{% if perms.auth.view_user %}
+<div>
+  {{isntance.first_name }} - {{instance.last_name}} 
+  {{instance.last_login}}
+</div>
+{% else %}
+<div>You are not allowedd to view this page </div>
+{% endif %}
+{% endif %}
+{% endif %}
+{% endblock content %}

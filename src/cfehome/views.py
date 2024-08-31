@@ -1,10 +1,13 @@
 import pathlib
-from django.shortcuts import render
+from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-
+from django.shortcuts import render
 from visits.models import PageVisit
 
 this_dir = pathlib.Path(__file__).resolve().parent
+
 
 def home_view(request, *args, **kwargs):
     return about_view(request, *args, **kwargs)
@@ -31,9 +34,7 @@ def about_view(request, *args, **kwargs):
 
 def my_old_home_page_view(request, *args, **kwargs):
     my_title = "My Page"
-    my_context = {
-        "page_title": my_title
-    }
+    my_context = {"page_title": my_title}
     html_ = """
     <!DOCTYPE html>
 <html>
@@ -42,7 +43,32 @@ def my_old_home_page_view(request, *args, **kwargs):
     <h1>{page_title} anything?</h1>
 </body>
 </html>    
-""".format(**my_context) # page_title=my_title
+""".format(**my_context)  # page_title=my_title
     # html_file_path = this_dir / "home.html"
     # html_ = html_file_path.read_text()
     return HttpResponse(html_)
+
+
+VALID_CODE = "abc123"
+
+
+def pw_protected_view(request, *args, **kwargs):
+    is_allowed = request.session.get("protected_page_allowed", 0)
+    print(is_allowed, type(is_allowed))
+    if request.method == "POST":
+        user_pw_sent = request.POST.get("code")
+        if user_pw_sent == VALID_CODE:
+            is_allowed = request.session["protected_page_allowed"] = 1
+    if is_allowed:
+        return render(request, "protected/view.html", {})
+    return render(request, "protected/entry.html")
+
+
+@login_required(login_url=settings.LOGIN_URL)
+def user_protected_view(request, *args, **kwargs):
+    return render(request, "protected/user_only.html", {})
+
+
+@staff_member_required(login_url=settings.LOGIN_URL)
+def staff_protected_view(request, *args, **kwargs):
+    return render(request, "protected/staff_only.html", {})

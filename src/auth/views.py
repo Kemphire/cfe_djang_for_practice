@@ -1,5 +1,6 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, get_user_model
+from django.contrib.auth import authenticate, get_user_model, login
+from django.shortcuts import redirect, render
+
 
 def login_view(request):
     print(request.method, request.POST or None)
@@ -12,7 +13,7 @@ def login_view(request):
             login(request, user)
             print("logined here!")
             return redirect("home")
-    return render(request, "auth/login.html",{})
+    return render(request, "auth/login.html", {})
 
 
 def register_view(request):
@@ -27,7 +28,7 @@ def register_view(request):
             email_exists = model.objects.filter(email__iexact=email).exists()
             if not user_exists or not email_exists:
                 ...
-            model.objects.create_user(username=username,email=email,password=password)
+            model.objects.create_user(username=username, email=email, password=password)
             return redirect("home")
-            
-    return render(request, "auth/register.html",{})
+
+    return render(request, "auth/register.html", {})
