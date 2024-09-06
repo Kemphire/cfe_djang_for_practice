@@ -4,6 +4,8 @@ from django.conf import settings
 
 from django.db.models.signals import post_save
 
+import helpers
+
 SUBSRIPTION_PERMISSION = [
     ("advanced", "Advanced Perm"),
     ("pro", "Pro perm"),
@@ -26,12 +28,75 @@ class Subscriptions(models.Model):
             "codename__in": [x[0] for x in SUBSRIPTION_PERMISSION],
         },
     )
+    stripe_id = models.CharField(max_length=120, null=True, blank=True)
 
     def __str__(self) -> str:
         return self.name.capitalize()
 
     class Meta:
         permissions = SUBSRIPTION_PERMISSION
+
+    def save(self, *args, **kwargs):
+        if not self.stripe_id:
+            stripe_id = helpers.billing.create_product(
+                name=self.name,
+                metadata={
+                    "subscription_plan_id": self.id,
+                },
+                raw=False,
+            )
+            self.stripe_id = stripe_id
+        super().save(*args, **kwargs)
+
+
+class SubscriptionsPrice(models.Model):
+    class IntervalChoices(models.TextChoices):
+        MONTHLY = "month", "Monthly"
+        YEARLY = "year", "Yearly"
+
+    subscription = models.ForeignKey(
+        Subscriptions, on_delete=models.SET_NULL, null=True
+    )
+    stripe_id = models.CharField(max_length=120, null=True, blank=True)
+    interval = models.CharField(
+        max_length=120, default=IntervalChoices.MONTHLY, choices=IntervalChoices.choices
+    )
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=99.99)
+
+    @property
+    def product_stripe_id(self):
+        if not self.subscription:
+            return None
+        return self.subscription.stripe_id
+
+    @property
+    def stripe_currency(self):
+        return "usd"
+
+    @property
+    def stripe_price(self):
+        """
+        For stripe price remove decimal prices
+        """
+        return int(self.price * 100)
+
+    def save(self, *args, **kwargs):
+        if self.product_stripe_id is not None and self.stripe_id is None:
+            stripe_id = helpers.billing.create_price(
+                currency=self.stripe_currency,
+                unit_amount=self.stripe_price,
+                interval=self.interval,
+                product=self.product_stripe_id,
+                metadata={
+                    "subscription_plan_price_id": self.id,
+                },
+                raw=False,
+            )
+            self.stripe_id = stripe_id
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return f"Price of {self.subscription.name} "
 
 
 class UserSubscription(models.Model):
