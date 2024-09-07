@@ -6,8 +6,8 @@ import helpers
 VENDORSTATIC_FILE = getattr(settings, "STATICFILES_VENDOR_DIR")
 
 VENDOR_STATIC_FILES = {
-    "flowbite.min.js": "https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css",
-    "flowbite.min.css": "https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js",
+    "flowbite.min.js": "https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js",
+    "flowbite.min.css": "https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css",
 }
 
 

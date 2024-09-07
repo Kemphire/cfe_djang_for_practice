@@ -29,6 +29,28 @@ class Subscriptions(models.Model):
         },
     )
     stripe_id = models.CharField(max_length=120, null=True, blank=True)
+    order = models.IntegerField(default=-1, help_text="Odering on django pricing page")
+    featured = models.BooleanField(
+        default=True,
+        help_text="Featured on Django Pricing page, doesn't affect stripe things",
+    )
+    updated = models.DateTimeField(
+        auto_now=True,
+    )
+    timestamp = models.DateTimeField(
+        auto_now_add=True,
+    )
+    features = models.TextField(
+        help_text="Features for Subscription seperated by new line",
+        blank=True,
+        null=True,
+    )
+    subtitle = models.TextField(blank=True, null=True)
+
+    def get_features_as_list(self):
+        if not self.features:
+            return []
+        return [x.strip() for x in self.features.split("\n")]
 
     def __str__(self) -> str:
         return self.name.capitalize()
@@ -62,6 +84,17 @@ class SubscriptionsPrice(models.Model):
         max_length=120, default=IntervalChoices.MONTHLY, choices=IntervalChoices.choices
     )
     price = models.DecimalField(max_digits=10, decimal_places=2, default=99.99)
+    order = models.IntegerField(default=-1, help_text="Odering on django pricing page")
+    featured = models.BooleanField(
+        default=True,
+        help_text="Featured on Django Pricing page, doesn't affect stripe things",
+    )
+    updated = models.DateTimeField(
+        auto_now=True,
+    )
+    timestamp = models.DateTimeField(
+        auto_now_add=True,
+    )
 
     @property
     def product_stripe_id(self):
@@ -70,8 +103,26 @@ class SubscriptionsPrice(models.Model):
         return self.subscription.stripe_id
 
     @property
+    def display_sub_name(self):
+        if not self.subscription:
+            return "Plan"
+        return self.subscription.name.title()
+
+    @property
     def stripe_currency(self):
         return "usd"
+
+    @property
+    def display_features_list(self):
+        if not self.subscription:
+            return []
+        return self.subscription.get_features_as_list()
+
+    @property
+    def display_sub_subtitle(self):
+        if not self.subscription:
+            return ""
+        return self.subscription.subtitle
 
     @property
     def stripe_price(self):
@@ -79,6 +130,9 @@ class SubscriptionsPrice(models.Model):
         For stripe price remove decimal prices
         """
         return int(self.price * 100)
+
+    class Meta:
+        ordering = ["subscription__order", "order", "featured", "-updated"]
 
     def save(self, *args, **kwargs):
         if self.product_stripe_id is not None and self.stripe_id is None:
@@ -94,6 +148,12 @@ class SubscriptionsPrice(models.Model):
             )
             self.stripe_id = stripe_id
         super().save(*args, **kwargs)
+        if self.featured:
+            qs = SubscriptionsPrice.objects.filter(
+                subscription=self.subscription,
+                interval=self.interval,
+            ).exclude(id=self.id)
+            qs.update(featured=False)
 
     def __str__(self) -> str:
         return f"Price of {self.subscription.name} "
