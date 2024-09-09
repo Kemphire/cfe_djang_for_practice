@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import Group, Permission
 from django.conf import settings
+from django.urls import reverse
 
 from django.db.models.signals import post_save
 
@@ -130,6 +131,9 @@ class SubscriptionsPrice(models.Model):
         For stripe price remove decimal prices
         """
         return int(self.price * 100)
+
+    def get_checkout_url(self):
+        return reverse("sub-price-checkout", kwargs={"price_id": self.id})
 
     class Meta:
         ordering = ["subscription__order", "order", "featured", "-updated"]
