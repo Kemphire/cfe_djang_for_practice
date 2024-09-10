@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "subscriptions",
     "customers",
     "checkouts",
+    "django_extensions",
     # Third party packages (apps)
     "allauth_ui",
     "allauth",

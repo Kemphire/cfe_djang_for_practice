@@ -5,7 +5,7 @@ from subscriptions.models import Subscriptions
 
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
-        print("How i'm not able to understand it")
+        # print("How i'm not able to understand it")
         qs = Subscriptions.objects.filter(active=True)
         for obj in qs:
             sub_perms = obj.permissions.all()
